@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 
 from .config import get_settings
-from .routers import health
+from .routers import health, memory
 
+from dotenv import load_dotenv
 
 def create_app() -> FastAPI:
     settings = get_settings()
@@ -10,6 +11,7 @@ def create_app() -> FastAPI:
 
     # Include routers
     app.include_router(health.router)
+    app.include_router(memory.router)
 
     return app
 
