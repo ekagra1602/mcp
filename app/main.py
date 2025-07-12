@@ -5,6 +5,8 @@ from .routers import health, memory
 
 from dotenv import load_dotenv
 
+load_dotenv()
+
 def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(title=settings.app_name, debug=settings.debug)
@@ -12,6 +14,30 @@ def create_app() -> FastAPI:
     # Include routers
     app.include_router(health.router)
     app.include_router(memory.router)
+
+    # Expose OpenAI plugin manifest so the server can be registered as a ChatGPT / LLM plugin
+    @app.get("/.well-known/ai-plugin.json", include_in_schema=False)
+    async def plugin_manifest() -> dict[str, object]:
+        """Return the plugin manifest so compatible LLMs (e.g. ChatGPT) can discover the API."""
+        return {
+            "schema_version": "v1",
+            "name_for_human": "MCP Memory Plugin",
+            "name_for_model": "mcp_memory",
+            "description_for_human": "Store and retrieve user memories to provide long-term context to LLM applications.",
+            "description_for_model": (
+                "Plugin for managing persistent memories. "
+                "Use `POST /memory` to add a memory (requires `user_id`, `llm`, `content`). "
+                "Use `GET /memory/{user_id}` to fetch memories for a user ordered by timestamp ascending."
+            ),
+            "auth": {"type": "none"},
+            "api": {
+                "type": "openapi",
+                "url": f"http://{settings.host}:{settings.port}/openapi.json",
+            },
+            "logo_url": None,
+            "contact_email": "support@example.com",
+            "legal_info_url": "https://github.com/your-org/mcp#license",
+        }
 
     return app
 
