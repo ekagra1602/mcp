@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Dict, List
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -29,6 +30,17 @@ class MemoryStore:
     def get(self, user_id: str) -> List[MemoryItem]:
         """Return all memory for a user (ordered by timestamp ascending)."""
         return sorted(self._store.get(user_id, []), key=lambda m: m.timestamp)
+
+    def search(self, user_id: str, query: str, *, llm: Optional[str] = None) -> List[MemoryItem]:
+        """Search a user's memory for items whose content contains the given query (case-insensitive).
+
+        Optionally filter by the originating LLM.
+        """
+        query_lc = query.lower()
+        results = [m for m in self.get(user_id) if query_lc in m.content.lower()]
+        if llm is not None:
+            results = [m for m in results if m.llm == llm]
+        return results
 
 
 # Global store instance the application can import

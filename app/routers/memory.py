@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from pydantic import BaseModel
 
 from ..memory import MemoryItem, memory_store
@@ -25,4 +25,17 @@ async def store_memory(request: StoreMemoryRequest) -> dict[str, str]:
 @router.get("/{user_id}", summary="Retrieve all memory for a user", response_model=List[MemoryItem])
 async def read_memory(user_id: str) -> List[MemoryItem]:
     """Get the entire memory timeline for a user."""
-    return memory_store.get(user_id) 
+    return memory_store.get(user_id)
+
+
+# New: search endpoint
+
+
+@router.get("/{user_id}/search", summary="Search memory for a user", response_model=List[MemoryItem])
+async def search_memory(
+    user_id: str,
+    q: str = Query(..., description="Search term (case-insensitive substring match)"),
+    llm: Optional[str] = Query(None, description="Filter by LLM name"),
+) -> List[MemoryItem]:
+    """Search within a user's memory items and optionally filter by LLM."""
+    return memory_store.search(user_id, q, llm=llm) 
