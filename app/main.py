@@ -1,9 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 
 from .config import get_settings
 from .routers import health, memory
 
 from dotenv import load_dotenv
+import time
 
 load_dotenv()
 
@@ -14,6 +15,15 @@ def create_app() -> FastAPI:
     # Include routers
     app.include_router(health.router)
     app.include_router(memory.router)
+
+    # Add per-request latency header so clients can see server-side processing time
+    @app.middleware("http")
+    async def add_process_time_header(request: Request, call_next):
+        start_time = time.perf_counter()
+        response = await call_next(request)
+        duration = time.perf_counter() - start_time
+        response.headers["X-Process-Time"] = f"{duration:.4f}s"
+        return response
 
     # Expose OpenAI plugin manifest so the server can be registered as a ChatGPT / LLM plugin
     @app.get("/.well-known/ai-plugin.json", include_in_schema=False)
