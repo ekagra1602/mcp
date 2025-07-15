@@ -1,4 +1,5 @@
 from typing import List, Optional
+from datetime import datetime
 
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
@@ -12,6 +13,15 @@ class StoreMemoryRequest(BaseModel):
     user_id: str
     llm: str
     content: str
+
+
+# New Pydantic model for stats response
+
+
+class MemoryStats(BaseModel):
+    total: int
+    first_timestamp: Optional[datetime]
+    last_timestamp: Optional[datetime]
 
 
 @router.post("/", summary="Store a new memory item")
@@ -38,4 +48,21 @@ async def search_memory(
     llm: Optional[str] = Query(None, description="Filter by LLM name"),
 ) -> List[MemoryItem]:
     """Search within a user's memory items and optionally filter by LLM."""
-    return memory_store.search(user_id, q, llm=llm) 
+    return memory_store.search(user_id, q, llm=llm)
+
+
+# Stats endpoint
+
+
+@router.get("/{user_id}/stats", summary="Get memory stats for a user", response_model=MemoryStats)
+async def memory_stats(user_id: str) -> MemoryStats:
+    """Return total number of items and earliest/latest timestamps."""
+    items = memory_store.get(user_id)
+    if not items:
+        return MemoryStats(total=0, first_timestamp=None, last_timestamp=None)
+
+    return MemoryStats(
+        total=len(items),
+        first_timestamp=items[0].timestamp,
+        last_timestamp=items[-1].timestamp,
+    ) 
