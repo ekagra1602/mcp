@@ -5,7 +5,7 @@ Use it as an OpenAI-compatible plugin, call the REST API directly, or embed the 
 
 ---
 
-## ✨ Features
+## Features
 
 * **Store & retrieve memories** with a single HTTP call (`POST /memory` / `GET /memory/{user_id}`)
 * **OpenAI Plugin Manifest** exposed at `/.well-known/ai-plugin.json` – add it to ChatGPT in seconds
@@ -15,7 +15,7 @@ Use it as an OpenAI-compatible plugin, call the REST API directly, or embed the 
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Clone repository & enter it
@@ -36,7 +36,7 @@ Interactive docs: <http://localhost:8000/docs>
 
 ---
 
-## 🔌 Using as an OpenAI / ChatGPT Plugin
+## Using as an OpenAI / ChatGPT Plugin
 
 1. Start the server on a publicly accessible URL (e.g. via [ngrok](https://ngrok.com/)):
    ```bash
@@ -100,7 +100,7 @@ Interactive docs: <http://localhost:8000/docs>
 
 ---
 
-## 🐍 In-Process Usage (Python)
+## In-Process Usage (Python)
 
 ```python
 from app.memory import MemoryItem, memory_store
@@ -115,7 +115,7 @@ for item in memory_store.get("bob"):
 
 ---
 
-## 🧩 Extending / Replacing the Backend
+##Extending / Replacing the Backend
 
 `MemoryStore` is deliberately simple. To use Redis, Postgres, or any other storage:
 
